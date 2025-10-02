@@ -10,7 +10,7 @@ import base64
 
 
 #URL de l'API FastAPI Azure
-URL_API = "http://localhost:8000" #On ne peut pas passer par l'URL publique (le port 8000 sera fermé, il faut donc rester sur la VM et le 127.0.0.1/localhost, port 8000 pour accéder à l'API)
+URL_API = "http://localhost:8001" #On ne peut pas passer par l'URL publique (le port 8001 sera fermé, il faut donc rester sur la VM et le 127.0.0.1/localhost, port 8001 pour accéder à l'API)
 streamlit.set_page_config(page_title="VGG16-Unet Interface", layout="wide")
 streamlit.title("🚗📹 Future Vision Transport 🤖🧠")
 
