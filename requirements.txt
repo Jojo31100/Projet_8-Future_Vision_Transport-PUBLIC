@@ -9,6 +9,7 @@ streamlit
 tensorflow
 
 #Pre/Post-traitement
+python-multipart
 numpy
 pydantic
 pillow
