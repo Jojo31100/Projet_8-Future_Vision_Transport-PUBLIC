@@ -1,7 +1,6 @@
 #!/bin/bash
 
-#Definir la variable d'environnement pour le chemin de l'application
-#Le chemin par defaut pour les App Services Linux est /home/site/wwwroot
+#Définir la variable d'environnement pour le chemin de l'application
 APP_PATH="/home/site/wwwroot"
 
 #Chercher et activer le Virtual Environment
@@ -14,5 +13,12 @@ else
     echo "Pas de virtual environment trouve. Utilisation de l'environnement systeme."
 fi
 
-#Executer l'application avec Gunicorn pour la production
-exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --threads 2 --worker-class uvicorn.workers.UvicornWorker api:app #api_test:app
+#Etap 1 : lancer FastAPI en arrière-plan sur le port 8000
+echo "Demarrage de FastAPI en arriere-plan..."
+nohup uvicorn api:app --host 0.0.0.0 --port 8000 &
+
+#Etape 2 : lancer Streamlit au premier plan sur le port 80 ou celui défini par Azure
+#Azure App Service expose le port via la variable $PORT
+ST_PORT=${PORT:-8501}
+echo "Demarrage de Streamlit au premier plan sur le port $ST_PORT..."
+streamlit run ui.py --server.port $ST_PORT --server.headless true
