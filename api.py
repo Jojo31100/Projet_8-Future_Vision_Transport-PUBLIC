@@ -23,7 +23,7 @@ from tensorflow.keras.models import load_model
 #Chargement du modèle
 cheminModele = "./model/best_model_VGG16Unet_sans_DataAugmentation.keras"
 #DEBUG repertoireDonneesDeTest = "/content/drive/My Drive/Colab_Notebooks/Project_8/dataset/New_dataset/test/"
-repertoireDonneesDeTest = "/home/site/wwwroot/"
+repertoireDonneesDeTest = "./"
 modelCharge = load_model(cheminModele, compile=False)
 app = FastAPI(title="VGG16-Unet API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
