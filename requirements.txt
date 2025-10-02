@@ -1,0 +1,17 @@
+#API et serveur
+fastapi
+uvicorn[standard]
+gunicorn
+
+#Modele
+tensorflow
+
+#Pre/Post-traitement
+numpy
+pydantic
+pillow
+matplotlib
+requests
+
+#Azure BlobStorage
+azure-storage-blob

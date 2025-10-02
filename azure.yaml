@@ -1,0 +1,8 @@
+name: python-fastapi-webapp-Projet8-FutureVisionTransport
+location: francecentral
+runtime: python:3.12
+type: appservice
+src: .
+plan: F1
+restart: true
+python_requirements: requirements.txt

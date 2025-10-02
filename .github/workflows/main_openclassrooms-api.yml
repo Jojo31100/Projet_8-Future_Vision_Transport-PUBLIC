@@ -1,0 +1,70 @@
+name: Build and deploy Python app to Azure Web App - openclassrooms-api
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          #Mise a jour de pip
+          python -m pip install --upgrade pip
+          #Installation des dependances avec no-cache (bonne pratique)
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Run basic import test
+        run: |
+          python -c "import tensorflow; print('TensorFlow OK')"
+
+      #Optionel: ajouter ici les test-U de non-regression (PyTest, ...)
+
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: |
+            .
+            !venv/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write #Requis pour l'OIDC JWT
+      contents: read #Requis pour actions/checkout
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+
+      - name: Login to Azure using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_54A7FF66F8054EB1B16D1A25EA462941 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_AD088C46B3AE4343A5221F4B1ED7D88E }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7012C8572B35404E80AA01FAAD67D06E }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'openclassrooms-api'
+          slot-name: 'Production'
+          package: '.'
