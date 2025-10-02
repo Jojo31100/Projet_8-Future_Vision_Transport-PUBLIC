@@ -1,7 +1,9 @@
 #API et serveur
 fastapi
 uvicorn[standard]
-gunicorn
+
+#Interface
+streamlit
 
 #Modele
 tensorflow
@@ -10,7 +12,6 @@ tensorflow
 numpy
 pydantic
 pillow
-matplotlib
 requests
 
 #Azure BlobStorage
