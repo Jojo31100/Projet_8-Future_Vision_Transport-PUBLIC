@@ -1,5 +1,4 @@
-#API v0.1 (LIST only)
-
+#API v0.9 (test des 3 parties)
 
 #Imports
 import os
@@ -18,11 +17,10 @@ from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D, c
 from tensorflow.keras.models import Model
 from tensorflow.keras import backend
 from tensorflow.keras.models import load_model
-
+from fastapi.responses import JSONResponse
 
 #Chargement du modèle
 cheminModele = "./model/best_model_VGG16Unet_sans_DataAugmentation.keras"
-#DEBUG repertoireDonneesDeTest = "/content/drive/My Drive/Colab_Notebooks/Project_8/dataset/New_dataset/test/"
 repertoireDonneesDeTest = "./testPictures/"
 modelCharge = load_model(cheminModele, compile=False)
 app = FastAPI(title="VGG16-Unet API")
@@ -48,13 +46,13 @@ def resizeHorizontalX2(image_array):
 #Endpoint racine
 @app.get("/")
 async def root():
-    return {"message": "API VGG16-Unet v0.1 - en ligne"}
+    return {"message": "API VGG16-Unet v0.9 - en ligne"}
 
 #Endpoint : Lister les fichiers de test
 @app.post("/list")
 def listeFichiers():
     fichiers = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest) if fichier.endswith("_leftImg8bit.png")])
-    return {"nb fichiers": len(fichiers), "fichiers": fichiers}
+    return {"Nombre de fichiers": len(fichiers), "Fichiers": fichiers}
 
 #Endpoint : Prédire sur un numéro
 @app.post("/predict")
@@ -77,12 +75,18 @@ def predict(request: PredictionRequest):
 
 #Endpoint : Uploader et prédire une image
 @app.post("/predict_upload")
-def predict_upload(file: UploadFile = File(...)):
-    #Charger l'image uploadée
-    imageUploadee = Image.open(file.file).convert("RGB")
-    #Préparation de l'image pour modèle VGG16 (224x224 pixels en entrée)
-    imagePrediction = numpy.array(imageUploadee.resize((224,224))).astype("float32")/255
-    imagePrediction = numpy.expand_dims(imagePrediction, axis=0)
-    prediction = modelCharge.predict(imagePrediction, verbose=0)
-    masquePredit_array = numpy.argmax(prediction[0], axis=-1)
-    return {"masquePredit": imageVersBase64(resizeHorizontalX2(masquePredit_array))}
+async def predict_upload(file: UploadFile = File(...)):
+    try:
+        #Lire tout le contenu en mode "octets"
+        fichierOctets = await file.read()
+        if(len(fichierOctets) == 0):
+            return {"error": "Fichier vide ou non lu correctement"}
+        imageUploadee = Image.open(io.BytesIO(fichierOctets)).convert("RGB")
+        #Préparation pour le modèle
+        imagePrediction = numpy.array(imageUploadee.resize((224,224))).astype("float32")/255
+        imagePrediction = numpy.expand_dims(imagePrediction, axis=0)
+        prediction = modelCharge.predict(imagePrediction, verbose=0)
+        masquePredit_array = numpy.argmax(prediction[0], axis=-1)
+        return {"masquePredit": imageVersBase64(resizeHorizontalX2(masquePredit_array))}
+    except Exception as excpt:
+        return {"error": str(excpt)}

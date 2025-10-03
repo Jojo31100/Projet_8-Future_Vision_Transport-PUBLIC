@@ -1,4 +1,4 @@
-#INTERFACE UTILISATEUR v0.1 (LIST only)
+#INTERFACE UTILISATEUR v0.9 (test des 3 parties)
 
 
 #Imports
@@ -27,7 +27,7 @@ if(choix == "Lister les fichiers de test ?"):
     if(streamlit.button("Afficher la liste des fichiers")):
         res = requests.post(f"{URL_API}/list")
         if(res.status_code == 200):
-            fichiers = res.json()["fichiers"]
+            fichiers = res.json()["Fichiers"]
             streamlit.write(f"Nombre de fichiers : {len(fichiers)}")
             streamlit.table(fichiers)
         else:
@@ -40,9 +40,9 @@ elif(choix == "Prédire sur un numéro ?"):
         res = requests.post(f"{URL_API}/predict", json={"numero": numeroImage})
         if(res.status_code == 200):
             data = res.json()
-            streamlit.image(base64VersImage(data["imageCamera"]), caption="Image de la caméra")
-            streamlit.image(base64VersImage(data["masqueReel"]), caption="Masque réel")
-            streamlit.image(base64VersImage(data["masquePredit"]), caption="Masque prédit")
+            streamlit.image(base64VersImage(data["imageCamera"]), caption="Image de la caméra", width=448)
+            streamlit.image(base64VersImage(data["masqueReel"]), caption="Masque réel", width=448)
+            streamlit.image(base64VersImage(data["masquePredit"]), caption="Masque prédit", width=448)
         else:
             streamlit.error(f"Erreur API : {res.text}")
 
@@ -52,15 +52,17 @@ elif(choix == "Uploader et prédire une image ?"):
     if(fichier is not None):
         image = Image.open(fichier)
         if(streamlit.button("Lancer la prédiction sur l'image uploadée")):
-            #Envoi du fichier à l'API
-            res = requests.post(f"{URL_API}/predict_upload", files={"file": fichier})
+            #Remettre le curseur au début et lire en mode "octets"
+            fichier.seek(0)
+            fichierOctets = fichier.read()
+            files = {"file": (fichier.name, fichierOctets, fichier.type)}
+            res = requests.post(f"{URL_API}/predict_upload", files=files)
             if(res.status_code == 200):
-                data = res.json()
-                #Création de 2 colonnes pour afficher l'image et son masque prédit, côte à côte
+                donnees = res.json()
                 colonne1, colonne2 = streamlit.columns(2)
                 with colonne1:
-                    streamlit.image(image, caption="Image uploadée")
+                    streamlit.image(image, caption="Image uploadée", width=448)
                 with colonne2:
-                    streamlit.image(base64VersImage(data["masquePredit"]), caption="Masque prédit")
+                    streamlit.image(base64VersImage(donnees["masquePredit"]), caption="Masque prédit", width=448)
             else:
                 streamlit.error(f"Erreur API : {res.text}")
