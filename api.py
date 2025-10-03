@@ -1,4 +1,5 @@
-#API v0.9 (test des 3 parties)
+#API v0.9 (Release Candidate)
+
 
 #Imports
 import os
@@ -18,6 +19,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras import backend
 from tensorflow.keras.models import load_model
 from fastapi.responses import JSONResponse
+
 
 #Chargement du modèle
 cheminModele = "./model/best_model_VGG16Unet_sans_DataAugmentation.keras"
@@ -46,20 +48,20 @@ def resizeHorizontalX2(image_array):
 #Endpoint racine
 @app.get("/")
 async def root():
-    return {"message": "API VGG16-Unet v0.9 - en ligne"}
+    return {"message": "API VGG16-Unet v0.9(RC) - en ligne"}
 
 #Endpoint : Lister les fichiers de test
 @app.post("/list")
 def listeFichiers():
     fichiers = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest) if fichier.endswith("_leftImg8bit.png")])
-    return {"Nombre de fichiers": len(fichiers), "Fichiers": fichiers}
+    return {"Nombre de fichiers": len(fichiers), "fichiers": fichiers}
 
 #Endpoint : Prédire sur un numéro
 @app.post("/predict")
 def predict(request: PredictionRequest):
     fichiersCamera = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest) if fichier.endswith("_leftImg8bit.png")])
     fichiersMasques = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest) if fichier.endswith("_gtFine_labelIds.png")])
-    index = request.numero - 1
+    index = request.numero
     if((index < 0) or (index >= len(fichiersCamera))):
         return {"error": "Numéro d'image invalide !"}
     fichierCameraSelectionne = os.path.join(repertoireDonneesDeTest, fichiersCamera[index])

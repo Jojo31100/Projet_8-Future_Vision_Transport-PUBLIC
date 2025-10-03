@@ -1,4 +1,4 @@
-#INTERFACE UTILISATEUR v0.9 (test des 3 parties)
+#INTERFACE UTILISATEUR v0.9 (Release Candidate)
 
 
 #Imports
@@ -7,6 +7,8 @@ import requests
 from PIL import Image
 import io
 import base64
+import numpy
+import matplotlib.pyplot
 
 
 #URL de l'API FastAPI Azure
@@ -19,6 +21,23 @@ def base64VersImage(b64_string):
     donneesImage = base64.b64decode(b64_string)
     return Image.open(io.BytesIO(donneesImage))
 
+#Fonction de recolorisation des masques
+def reColorisation(imageBrute, cmap="viridis"):
+    #Conversion en tableau si c'est une "PIL.Image"
+    if(isinstance(imageBrute, Image.Image)):
+        imageBrute = numpy.array(imageBrute.convert("L"))
+    #Normalisation si "float"
+    if(imageBrute.dtype == numpy.float32 or imageBrute.dtype == numpy.float64):
+        imageBrute = (imageBrute * 255).astype(numpy.uint8)
+    imageBrute = (imageBrute * (255//7)).astype(numpy.uint8)
+    #Récupération de la colormap de MatPlotLib
+    colorMap = matplotlib.pyplot.get_cmap(cmap)
+    #Application de la colormap
+    imageColorMapee = colorMap(imageBrute)
+    #Conversion en RGB
+    imageTraitee = (imageColorMapee[:, :, :3] * 255).astype(numpy.uint8)
+    return Image.fromarray(imageTraitee)
+
 #Définition des choix possibles
 choix = streamlit.radio("Que voulez-vous faire ?", ["Lister les fichiers de test ?", "Prédire sur un numéro ?", "Uploader et prédire une image ?"])
 
@@ -27,7 +46,7 @@ if(choix == "Lister les fichiers de test ?"):
     if(streamlit.button("Afficher la liste des fichiers")):
         res = requests.post(f"{URL_API}/list")
         if(res.status_code == 200):
-            fichiers = res.json()["Fichiers"]
+            fichiers = res.json()["fichiers"]
             streamlit.write(f"Nombre de fichiers : {len(fichiers)}")
             streamlit.table(fichiers)
         else:
@@ -39,10 +58,16 @@ elif(choix == "Prédire sur un numéro ?"):
     if(streamlit.button("Lancer la prédiction")):
         res = requests.post(f"{URL_API}/predict", json={"numero": numeroImage})
         if(res.status_code == 200):
-            data = res.json()
-            streamlit.image(base64VersImage(data["imageCamera"]), caption="Image de la caméra", width=448)
-            streamlit.image(base64VersImage(data["masqueReel"]), caption="Masque réel", width=448)
-            streamlit.image(base64VersImage(data["masquePredit"]), caption="Masque prédit", width=448)
+            donnees = res.json()
+            colonne1, colonne2, colonne3 = streamlit.columns(3)
+            with colonne1:
+                streamlit.image(base64VersImage(donnees["imageCamera"]), caption="Image de la caméra", width=448)
+            with colonne2:
+                masqueReel = reColorisation(base64VersImage(donnees["masqueReel"]))
+                streamlit.image(masqueReel, caption="Masque réel", width=448)
+            with colonne3:
+                masquePredit = reColorisation(base64VersImage(donnees["masquePredit"]))
+                streamlit.image(masquePredit, caption="Masque prédit", width=448)
         else:
             streamlit.error(f"Erreur API : {res.text}")
 
@@ -63,6 +88,7 @@ elif(choix == "Uploader et prédire une image ?"):
                 with colonne1:
                     streamlit.image(image, caption="Image uploadée", width=448)
                 with colonne2:
-                    streamlit.image(base64VersImage(donnees["masquePredit"]), caption="Masque prédit", width=448)
+                    masquePredit = reColorisation(base64VersImage(donnees["masquePredit"]))
+                    streamlit.image(masquePredit, caption="Masque prédit", width=448)
             else:
                 streamlit.error(f"Erreur API : {res.text}")
