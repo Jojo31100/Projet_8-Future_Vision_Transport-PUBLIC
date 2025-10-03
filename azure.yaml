@@ -3,6 +3,6 @@ location: francecentral
 runtime: python:3.12
 type: appservice
 src: .
-plan: F1
+plan: B2
 restart: true
 python_requirements: requirements.txt
