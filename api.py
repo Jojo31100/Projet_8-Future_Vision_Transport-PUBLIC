@@ -53,7 +53,7 @@ async def root():
 #Endpoint : Lister les fichiers de test
 @app.post("/list")
 def listeFichiers():
-    fichiers = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest) if fichier.endswith("_leftImg8bit.png")])
+    fichiers = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest)]) #if fichier.endswith("_leftImg8bit.png")])
     return {"nb fichiers": len(fichiers), "fichiers": fichiers}
 
 #Endpoint : Prédire sur un numéro
