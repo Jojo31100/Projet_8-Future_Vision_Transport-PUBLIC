@@ -23,7 +23,7 @@ from tensorflow.keras.models import load_model
 #Chargement du modèle
 cheminModele = "./model/best_model_VGG16Unet_sans_DataAugmentation.keras"
 #DEBUG repertoireDonneesDeTest = "/content/drive/My Drive/Colab_Notebooks/Project_8/dataset/New_dataset/test/"
-repertoireDonneesDeTest = "."
+repertoireDonneesDeTest = "./testPictures/"
 modelCharge = load_model(cheminModele, compile=False)
 app = FastAPI(title="VGG16-Unet API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -53,7 +53,7 @@ async def root():
 #Endpoint : Lister les fichiers de test
 @app.post("/list")
 def listeFichiers():
-    fichiers = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest)]) #if fichier.endswith("_leftImg8bit.png")])
+    fichiers = sorted([fichier for fichier in os.listdir(repertoireDonneesDeTest) if fichier.endswith("_leftImg8bit.png")])
     return {"nb fichiers": len(fichiers), "fichiers": fichiers}
 
 #Endpoint : Prédire sur un numéro
