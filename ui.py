@@ -1,4 +1,4 @@
-#INTERFACE UTILISATEUR v0.9 (Release Candidate)
+#INTERFACE UTILISATEUR v1.0
 
 
 #Imports
@@ -54,7 +54,7 @@ if(choix == "Lister les fichiers de test ?"):
 
 #Prédire sur un numéro
 elif(choix == "Prédire sur un numéro ?"):
-    numeroImage = streamlit.number_input("Numéro de l'image à prédire :", min_value=1, step=1)
+    numeroImage = streamlit.number_input("Numéro de l'image à prédire :", min_value=0, step=1)
     if(streamlit.button("Lancer la prédiction")):
         res = requests.post(f"{URL_API}/predict", json={"numero": numeroImage})
         if(res.status_code == 200):

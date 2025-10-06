@@ -1,4 +1,4 @@
-#API v0.9 (Release Candidate)
+#API v1.0
 
 
 #Imports
@@ -48,7 +48,7 @@ def resizeHorizontalX2(image_array):
 #Endpoint racine
 @app.get("/")
 async def root():
-    return {"message": "API VGG16-Unet v0.9(RC) - en ligne"}
+    return {"message": "API VGG16-Unet v1.0"}
 
 #Endpoint : Lister les fichiers de test
 @app.post("/list")
