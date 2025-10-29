@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  PYTHON_VERSION: '3.12'
+  VENV_NAME: 'antenv' # <--- CRUCIAL : NOM CORRESPONDANT AU SCRIPT STARTUP.SH
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,60 +17,76 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository and LFS files
+      - name: 📦 Checkout repository and LFS files
         uses: actions/checkout@v4
         with:
-          lfs: true 
+          lfs: true
 
-      - name: Set up Python version
+      - name: 🐍 Set up Python environment
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-
-      - name: Install dependencies
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip' 
+          
+      # --- DÉPLACEMENT DU BUILD LOURD SUR GITHUB ACTIONS ---
+      - name: 🛠️ Install dependencies and Build Environment
         run: |
-          #Mise a jour de pip
+          # 1. Mise à jour de pip
           python -m pip install --upgrade pip
-          #Installation des dependances avec no-cache (bonne pratique)
+          
+          # 2. Création de l'environnement virtuel avec le nom 'antenv'
+          python -m venv ${{ env.VENV_NAME }}
+          source ${{ env.VENV_NAME }}/bin/activate
+          
+          # 3. Installation des dépendances lourdes
           pip install --no-cache-dir -r requirements.txt
-
-      - name: Run basic import test
+          pip freeze > requirements.txt
+          
+      - name: 🧪 Run basic import test
         run: |
+          source ${{ env.VENV_NAME }}/bin/activate
           python -c "import tensorflow; print('TensorFlow OK')"
 
-      #Optionel: ajouter ici les test-U de non-regression (PyTest, ...)
-
-      - name: Upload artifact for deployment jobs
+      # ---------------------------------------------------
+      
+      - name: 📦 Create Deployment Package (ZIP)
+        run: |
+          # Crée un package zip de l'application *avec* l'environnement virtuel inclus.
+          # Nous ajoutons aussi le script startup.sh pour s'assurer qu'il est exécutable.
+          chmod +x startup.sh
+          zip -r deployment_package.zip . -x "*.git*" "*__pycache__*" 
+          
+      - name: 📤 Upload Artifact for Deployment
         uses: actions/upload-artifact@v4
         with:
-          name: python-app
-          path: |
-            .
-            !venv/
+          name: python-app-package
+          path: deployment_package.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write #Requis pour l'OIDC JWT
-      contents: read #Requis pour actions/checkout
+      id-token: write 
+      contents: read 
 
     steps:
-      - name: Download artifact from build job
+      - name: ⬇️ Download deployment package
         uses: actions/download-artifact@v4
         with:
-          name: python-app
+          name: python-app-package
 
-      - name: Login to Azure using OIDC
+      - name: 🔑 Login to Azure using OIDC
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_54A7FF66F8054EB1B16D1A25EA462941 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_AD088C46B3AE4343A5221F4B1ED7D88E }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7012C8572B35404E80AA01FAAD67D06E }}
 
-      - name: Deploy to Azure Web App
+      - name: 🚀 Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'openclassrooms-api'
           slot-name: 'Production'
-          package: '.'
+          package: 'deployment_package.zip' 
+          # NOUVEAU : Exécute le script de démarrage inclus dans le package
+          startup-command: './startup.sh'
