@@ -16,7 +16,7 @@ matplotlib
 pydantic
 pillow
 requests
-cv2
+opencv-python
 
 #Azure BlobStorage
 azure-storage-blob
