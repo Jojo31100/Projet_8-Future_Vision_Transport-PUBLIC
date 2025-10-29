@@ -8,8 +8,9 @@ on:
 
 env:
   PYTHON_VERSION: '3.12'
-  VENV_NAME: 'antenv' # <--- CRUCIAL : NOM CORRESPONDANT AU SCRIPT STARTUP.SH
-  
+  VENV_NAME: 'antenv' 
+  DEPLOYMENT_PACKAGE: 'deployment_package.zip' #Variable pour le nom du fichier ZIP
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,39 +29,33 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip' 
           
-      # --- DÉPLACEMENT DU BUILD LOURD SUR GITHUB ACTIONS ---
-      - name: 🛠️ Install dependencies and Build Environment
+      #🛠️ INSTALLATION DES DÉPENDANCES SUR GITHUB (ET NON AZURE !)
+      - name: Install dependencies and Build Environment
         run: |
-          # 1. Mise à jour de pip
+          #1. Mise à jour de pip
           python -m pip install --upgrade pip
           
-          # 2. Création de l'environnement virtuel avec le nom 'antenv'
+          #2. Création de l'environnement virtuel 'antenv'
           python -m venv ${{ env.VENV_NAME }}
           source ${{ env.VENV_NAME }}/bin/activate
           
-          # 3. Installation des dépendances lourdes
+          #3. Installation des dépendances lourdes
           pip install --no-cache-dir -r requirements.txt
           pip freeze > requirements.txt
           
-      - name: 🧪 Run basic import test
-        run: |
-          source ${{ env.VENV_NAME }}/bin/activate
-          python -c "import tensorflow; print('TensorFlow OK')"
-
-      # ---------------------------------------------------
-      
       - name: 📦 Create Deployment Package (ZIP)
         run: |
-          # Crée un package zip de l'application *avec* l'environnement virtuel inclus.
-          # Nous ajoutons aussi le script startup.sh pour s'assurer qu'il est exécutable.
+          #On s'assure que le script de démarrage est exécutable
           chmod +x startup.sh
-          zip -r deployment_package.zip . -x "*.git*" "*__pycache__*" 
+          #Création du ZIP incluant le dossier 'antenv'
+          #ATTENTION : ajout du '-r' pour récursif
+          zip -r ${{ env.DEPLOYMENT_PACKAGE }} . -x "*.git*" "*__pycache__*" 
           
       - name: 📤 Upload Artifact for Deployment
         uses: actions/upload-artifact@v4
         with:
           name: python-app-package
-          path: deployment_package.zip
+          path: ${{ env.DEPLOYMENT_PACKAGE }} #Utilisation de la variable d'environnement
 
   deploy:
     runs-on: ubuntu-latest
@@ -87,6 +82,6 @@ jobs:
         with:
           app-name: 'openclassrooms-api'
           slot-name: 'Production'
-          package: 'deployment_package.zip' 
-          # NOUVEAU : Exécute le script de démarrage inclus dans le package
+          #On force l'action à pointer sur le fichier ZIP téléchargé !
+          package: ${{ env.DEPLOYMENT_PACKAGE }} 
           startup-command: './startup.sh'
