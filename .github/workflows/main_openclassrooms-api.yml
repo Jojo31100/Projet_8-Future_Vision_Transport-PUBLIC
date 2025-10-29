@@ -69,6 +69,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app-package
+          path: .
 
       - name: 🔑 Login to Azure using OIDC
         uses: azure/login@v2
