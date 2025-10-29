@@ -7,6 +7,7 @@ streamlit
 
 #Modele
 tensorflow
+ultralytics
 
 #Pre/Post-traitement
 python-multipart
@@ -15,6 +16,7 @@ matplotlib
 pydantic
 pillow
 requests
+cv2
 
 #Azure BlobStorage
 azure-storage-blob
