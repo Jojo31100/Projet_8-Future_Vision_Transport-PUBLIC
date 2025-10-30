@@ -23,7 +23,7 @@ import cv2
 
 #Chargement du modèle
 cheminModele = os.path.join(os.path.dirname(__file__), "model", "best_model_VGG16Unet_sans_DataAugmentation.keras") 
-cheminModele_YOLO = os.path.join(os.path.dirname(__file__), "model", "best_model_YOLOv8-l-seg_fine-tuning.pt")
+cheminModele_YOLO = os.path.join(os.path.dirname(__file__), "model", "best_model_YOLOv8-l-seg_finetuned.pt")
 repertoireDonneesDeTest = os.path.join(os.path.dirname(__file__), "testPictures")
 modelCharge = load_model(cheminModele, compile=False)
 modelCharge_YOLO = YOLO(cheminModele_YOLO)
