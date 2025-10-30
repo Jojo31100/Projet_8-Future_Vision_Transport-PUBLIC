@@ -10,7 +10,7 @@ WORKDIR /app
 #Etape 3 : Copier et installer les dépendances
 COPY requirements.txt .
 RUN apt-get update && apt-get install -y \
-    build-essential libgl1 curl git && \
+    build-essential libgl1 libglib2.0-0 curl git && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
