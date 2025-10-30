@@ -12,9 +12,9 @@ import matplotlib.pyplot
 
 
 #URL de l'API FastAPI Azure
-URL_API = "http://localhost:8501"
+URL_API = "http://localhost:8001"
 streamlit.set_page_config(page_title="VGG16-Unet Interface", layout="wide")
-streamlit.title("🚗📹 -> Future Vision Transport 30/10 19:44")
+streamlit.title("🚗📹 -> Future Vision Transport 30/10 21:36")
 
 #Fonction de conversion base64 --> Image
 def base64VersImage(b64_string):
