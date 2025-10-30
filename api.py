@@ -22,9 +22,9 @@ import cv2
 
 
 #Chargement du modèle
-cheminModele = "./model/best_model_VGG16Unet_sans_DataAugmentation.keras"
-cheminModele_YOLO = "./model/best_model_YOLOv8-l-seg_fine-tuning.pt"
-repertoireDonneesDeTest = "./testPictures/"
+cheminModele = os.path.join(os.path.dirname(__file__), "model", "best_model_VGG16Unet_sans_DataAugmentation.keras") 
+cheminModele_YOLO = os.path.join(os.path.dirname(__file__), "model", "best_model_YOLOv8-l-seg_fine-tuning.pt")
+repertoireDonneesDeTest = os.path.join(os.path.dirname(__file__), "testPictures")
 modelCharge = load_model(cheminModele, compile=False)
 modelCharge_YOLO = YOLO(cheminModele_YOLO)
 app = FastAPI(title="VGG16-Unet & YOLOv8 API")
