@@ -26,7 +26,7 @@ nohup uvicorn api:app --host 0.0.0.0 --port $API_PORT > /home/logs/fastapi.log 2
 # Log de diagnostic
 echo "Flux de logs : $(ls -l /home/logs 2>/dev/null || true)"
 echo "PATH actuel = $PATH"
-which streamlit || echo "⚠️ Streamlit introuvable dans le PATH"
+which streamlit || echo "⚠️ Streamlit introuvable dans le PATH !"
 
 # Lancer Streamlit au premier plan
 echo "Démarrage de Streamlit sur le port $SL_PORT..."
