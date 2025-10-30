@@ -1,6 +1,6 @@
 name: Build and deploy Python app to Azure Web App - openclassrooms-api
 
-on:
+#on:
   push:
     branches:
       - main
