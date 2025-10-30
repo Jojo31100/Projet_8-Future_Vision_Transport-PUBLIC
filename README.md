@@ -1,4 +1,4 @@
-![CI/CD](https://github.com/Jojo31100/Projet_8-Future_Vision_Transport-PUBLIC/actions/workflows/main_openclassrooms-api.yml/badge.svg)
+![CI/CD](https://github.com/Jojo31100/Projet_8-Future_Vision_Transport-PUBLIC/actions/workflows/deploy-docker.yml/badge.svg)
 ---
 # Projet_8-Future_Vision_Transport-PUBLIC
 Projet OpenClassRooms n°8 : Future Vision Transport - Traitez les images pour le système embarqué d’une voiture autonome - PUBLIC
