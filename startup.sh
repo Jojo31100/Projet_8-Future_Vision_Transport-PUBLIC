@@ -1,27 +1,33 @@
 #!/bin/bash
+set -e #Stoppe en cas d'erreur
 
-#Définir la variable d'environnement pour le chemin de l'application
 APP_PATH="/home/site/wwwroot"
+cd "$APP_PATH"
 
-#Chercher et activer le Virtual Environment
-VENV_PATH=$(find /home -type d -name "antenv")
-
-if [ -n "$VENV_PATH" ]; then
+# Chercher le venv
+VENV_PATH=$(find /home -type d -name "antenv" | head -n 1)
+if [ -d "$VENV_PATH" ]; then
+    echo "Activation du virtualenv à $VENV_PATH"
     source "$VENV_PATH/bin/activate"
-    echo "Virtual environment active : $VENV_PATH"
+    export PATH="$VENV_PATH/bin:$PATH"
+    echo "Virtualenv activé, Python: $(which python)"
 else
-    echo "Pas de virtual environment trouve. Utilisation de l'environnement systeme."
+    echo "⚠️  Aucun virtualenv trouvé, exécution dans l'environnement système."
 fi
 
-#Définition des Ports
+# Ports
 API_PORT=8001
 SL_PORT=${PORT:-8501}
 
+# Lancer FastAPI en arrière-plan
+echo "Démarrage de FastAPI sur le port $API_PORT..."
+nohup uvicorn api:app --host 0.0.0.0 --port $API_PORT > /home/logs/fastapi.log 2>&1 &
 
-#Etape 1 : lancer FastAPI en arrière-plan sur le port 8001
-echo "Demarrage de FastAPI en arriere-plan sur le port $API_PORT..."
-nohup uvicorn api:app --host 0.0.0.0 --port $API_PORT &
+# Log de diagnostic
+echo "Flux de logs : $(ls -l /home/logs 2>/dev/null || true)"
+echo "PATH actuel = $PATH"
+which streamlit || echo "⚠️ Streamlit introuvable dans le PATH"
 
-#Etape 2 : lancer Streamlit au premier plan sur le port $PORT (exposé par Azure)
-echo "Demarrage de Streamlit au premier plan sur le port $ST_PORT..."
-streamlit run ui.py --server.port $SL_PORT --server.headless true
+# Lancer Streamlit au premier plan
+echo "Démarrage de Streamlit sur le port $SL_PORT..."
+exec streamlit run ui.py --server.port "$SL_PORT" --server.headless true
