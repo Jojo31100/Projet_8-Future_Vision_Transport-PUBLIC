@@ -53,7 +53,7 @@ def fusionImageCameraEtMasquePredit(imageCamera, masquePredit, alpha=0.4):
 
 #Mise en page & CSS pour réduire les paddings
 streamlit.set_page_config(page_title="VGG16-Unet & YOLO Interface", layout="wide")
-streamlit.markdown(\"\"\"<style>.block-container{padding-top:1rem; padding-bottom:0rem; padding-left:1rem; padding-right:1rem;}h1,h2,h3{margin-top:0rem; margin-bottom:0rem; line-height:1.5;}.stMarkdown{margin-bottom:0.3rem;}div[data-testid="stHorizontalBlock"]{gap:0.5rem;}hr{margin-top:0.3rem; margin-bottom:0.5rem;}.stRadio > div{gap:0.3rem;}</style>\"\"\", unsafe_allow_html=True)
+streamlit.markdown("""<style>.block-container{padding-top:1rem; padding-bottom:0rem; padding-left:1rem; padding-right:1rem;}h1,h2,h3{margin-top:0rem; margin-bottom:0rem; line-height:1.5;}.stMarkdown{margin-bottom:0.3rem;}div[data-testid="stHorizontalBlock"]{gap:0.5rem;}hr{margin-top:0.3rem; margin-bottom:0.5rem;}.stRadio > div{gap:0.3rem;}</style>""", unsafe_allow_html=True)
 
 #Titre principal
 streamlit.markdown("<h1 style='text-align:center; margin-bottom:0.2rem;'>P🧠C - DASHBOARD</h1>", unsafe_allow_html=True)
@@ -120,7 +120,7 @@ with col2:
     for pourcentage in ax_histogramme.patches:
         height = pourcentage.get_height()
         if(height > 0):
-            ax_histogramme.annotate(f"\\n---{height:.0f}%", (pourcentage.get_x() + pourcentage.get_width() / 2, height), ha="center", va="bottom", fontsize=7, rotation=75)
+            ax_histogramme.annotate(f"\n---{height:.0f}%", (pourcentage.get_x() + pourcentage.get_width() / 2, height), ha="center", va="bottom", fontsize=7, rotation=75)
     matplotlib.pyplot.tight_layout()
     buffer_histogramme = io.BytesIO()
     fig_histogramme.savefig(buffer_histogramme, format="png", bbox_inches="tight", dpi=80)
