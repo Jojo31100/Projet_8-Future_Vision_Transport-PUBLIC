@@ -11,6 +11,7 @@ ultralytics
 
 #Pre/Post-traitement
 python-multipart
+pandas
 numpy
 matplotlib
 pydantic
