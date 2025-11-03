@@ -7,6 +7,7 @@ from PIL import Image
 import io
 import base64
 import pandas
+import numpy
 import matplotlib.pyplot
 import cv2
 
