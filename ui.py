@@ -1,4 +1,4 @@
-#INTERFACE UTILISATEUR v1.1_alpha
+#INTERFACE UTILISATEUR v1.2_alpha
 
 
 import streamlit
@@ -57,15 +57,15 @@ choix = streamlit.radio("Que voulez-vous faire ?", ["Lister les fichiers de test
 if(choix == "Lister les fichiers de test"):
     if(streamlit.button("Afficher la liste des fichiers")):
         try:
-            res = requests.post(f"{{URL_API}}/list", timeout=30)
+            res = requests.post(f"{URL_API}/list", timeout=30)
             if(res.status_code == 200):
                 fichiers = res.json()["fichiers"]
-                streamlit.success(f"✅ Nombre de fichiers : {{len(fichiers)}}")
+                streamlit.success(f"✅ Nombre de fichiers : {len(fichiers)}")
                 streamlit.table(fichiers)
             else:
-                streamlit.error(f"Erreur API : {{res.text}}")
+                streamlit.error(f"Erreur API : {res.text}")
         except Exception as e:
-            streamlit.error(f"Erreur : {{str(e)}}")
+            streamlit.error(f"Erreur : {str(e)}")
 
 elif(choix == "Prédire sur un numéro"):
     numeroImage = streamlit.number_input("Numéro de l'image :", min_value=0, step=1)
@@ -84,9 +84,9 @@ elif(choix == "Prédire sur un numéro"):
                 endpoint = "/predict"
             else:
                 endpoint = "/predict_YOLO"
-            streamlit.markdown(f"🔍 Résultat du modèle {{modele}}")
+            streamlit.markdown(f"🔍 Résultat du modèle {modele}")
             try:
-                res = requests.post(f"{{URL_API}}{{endpoint}}", json={{"numero": numeroImage}}, timeout=60)
+                res = requests.post(f"{URL_API}{endpoint}", json={"numero": numeroImage}, timeout=60)
                 if(res.status_code == 200):
                     donnees = res.json()
                     imageCamera = base64VersImage(donnees["imageCamera"])
@@ -103,9 +103,9 @@ elif(choix == "Prédire sur un numéro"):
                     with col4:
                         streamlit.image(imageFusion, caption="Fusion", width=350)
                 else:
-                    streamlit.error(f"Erreur : {{res.text}}")
+                    streamlit.error(f"Erreur : {res.text}")
             except Exception as e:
-                streamlit.error(f"Erreur : {{str(e)}}")
+                streamlit.error(f"Erreur : {str(e)}")
 
 elif(choix == "Uploader et prédire une image"):
     fichier = streamlit.file_uploader("Choisir un fichier", type=["png", "jpg", "jpeg"])
@@ -126,12 +126,12 @@ elif(choix == "Uploader et prédire une image"):
                     endpoint = "/predict_upload"
                 else:
                     endpoint = "/predict_upload_YOLO"
-                streamlit.markdown(f"🔍 Résultat du modèle {{modele}}")
+                streamlit.markdown(f"🔍 Résultat du modèle {modele}")
                 try:
                     fichier.seek(0)
                     fichierOctets = fichier.read()
-                    files = {{"file": (fichier.name, fichierOctets, fichier.type)}}
-                    res = requests.post(f"{{URL_API}}{{endpoint}}", files=files, timeout=60)
+                    files = {"file": (fichier.name, fichierOctets, fichier.type)}
+                    res = requests.post(f"{URL_API}{endpoint}", files=files, timeout=60)
                     if(res.status_code == 200):
                         donnees = res.json()
                         masquePredit = reColorisation(base64VersImage(donnees["masquePredit"]))
@@ -144,6 +144,6 @@ elif(choix == "Uploader et prédire une image"):
                         with col3:
                             streamlit.image(imageFusion, caption="Fusion", width=400)
                     else:
-                        streamlit.error(f"Erreur : {{res.text}}")
+                        streamlit.error(f"Erreur : {res.text}")
                 except Exception as e:
-                    streamlit.error(f"Erreur : {{str(e)}}")
+                    streamlit.error(f"Erreur : {str(e)}")
