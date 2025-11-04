@@ -1,4 +1,5 @@
-#INTERFACE UTILISATEUR (DASHBOARD) v1.5_alpha
+#INTERFACE UTILISATEUR (DASHBOARD) v1.5_rc
+
 
 import streamlit
 import requests
@@ -12,7 +13,6 @@ import numpy
 
 
 #URL de l'API FastAPI
-#URL_API = "{api_url}"            #VERSION GOOGLE COLAB
 URL_API = "http://localhost:8001" #VERSION AZURE
 
 
@@ -67,7 +67,7 @@ def mappingDesClassesCityscapeVers8MacroClasses(masque_array):
         masque_mappe[masque_array == id_original] = classe_8
     return masque_mappe
 
-#Fonction de calcul de l'"Intersection Over Union coefficient" (IoU) par catégorie/macro-classe :
+#Fonction de calcul de l'"Intersection Over Union coefficient" (IoU) par catégorie/macro-classe
 def coefIoUParClasse(y_true, y_pred, nbClasses=8, smooth=1):
     iouParClasse = {}
     iouClassesPresentes = []
@@ -117,16 +117,16 @@ def graphiqueIoU(iouParClasse, cmap="viridis"):
     matplotlib.pyplot.close(histogramme)
     return imageGraphique
 
+#Fonction factice pour forcer le re-rendu de la page
+def placeholder_callback():
+    pass
 
-#Mise en page & CSS pour réduire les paddings
+
+#Mise en page
 streamlit.set_page_config(page_title="VGG16-Unet & YOLO Interface", layout="wide")
-streamlit.markdown("""<style>.block-container{padding-top:1rem; padding-bottom:0rem; padding-left:1rem; padding-right:1rem;}h1,h2,h3{margin-top:0rem; margin-bottom:0rem; line-height:1.5;}.stMarkdown{margin-bottom:0.3rem;}div[data-testid="stHorizontalBlock"]{gap:0.5rem;}hr{margin-top:0.3rem; margin-bottom:0.5rem;}.stRadio > div{gap:0.3rem;}</style>""", unsafe_allow_html=True)
-
-#Titre principal
-streamlit.markdown("<h1 style='text-align:center; margin-bottom:0.2rem;'>POC - DASHBOARD</h1>", unsafe_allow_html=True)
 
 
-#1ère section : Analyse Exploratoire avec expander
+#1ère section : Analyse Exploratoire
 with streamlit.expander("📊 Analyse exploratoire", expanded=True):
     streamlit.markdown("<hr style='border: 3px solid blue;'>", unsafe_allow_html=True)
     #Liste des macro-Classes
@@ -140,11 +140,9 @@ with streamlit.expander("📊 Analyse exploratoire", expanded=True):
     }
     labelsDataset = ["Train", "Val", "Test"]
     pourcentageDuDataset = [60, 10, 30]
-
     #Palette de couleurs Matplotlib par défaut (la même que celle utilisée pour le barplot)
     paletteCouleurs = matplotlib.pyplot.rcParams["axes.prop_cycle"].by_key()["color"]
     troisPremieresCouleurs = paletteCouleurs[:3]
-
     #Création des colonnes Streamlit (30%, 50% et 20%)
     col1, col2, _ = streamlit.columns([3, 5, 2])
 
@@ -185,13 +183,11 @@ with streamlit.expander("📊 Analyse exploratoire", expanded=True):
         streamlit.image(buffer_histogramme, use_container_width=False)
         matplotlib.pyplot.close(fig_histogramme)
 
-#2ème section : test des modèles
+#2ème section : Test des Modèles
 with streamlit.expander("🧪 Test des modèles", expanded=True):
     streamlit.markdown("<hr style='border: 3px solid blue;'>", unsafe_allow_html=True)
-
     #Définition des choix possibles
     choix = streamlit.radio("Que voulez-vous faire ?", ["Lister les fichiers de test", "Prédire sur un numéro", "Uploader et prédire une image"])
-
     if(choix == "Lister les fichiers de test"):
         if(streamlit.button("Afficher la liste des fichiers")):
             try:
@@ -204,7 +200,6 @@ with streamlit.expander("🧪 Test des modèles", expanded=True):
                     streamlit.error(f"Erreur API : {res.text}")
             except Exception as e:
                 streamlit.error(f"Erreur : {str(e)}")
-
     elif(choix == "Prédire sur un numéro"):
         numeroImage = streamlit.number_input("Numéro de l'image :", min_value=0, step=1)
         streamlit.write("Choix du/des modèle(s) :")
@@ -261,7 +256,6 @@ with streamlit.expander("🧪 Test des modèles", expanded=True):
                         streamlit.error(f"Erreur : {res.text}")
                 except Exception as e:
                     streamlit.error(f"Erreur : {str(e)}")
-
     elif(choix == "Uploader et prédire une image"):
         fichier = streamlit.file_uploader("Choisir un fichier", type=["png", "jpg", "jpeg"])
         if(fichier is not None):
@@ -302,3 +296,14 @@ with streamlit.expander("🧪 Test des modèles", expanded=True):
                             streamlit.error(f"Erreur : {res.text}")
                     except Exception as e:
                         streamlit.error(f"Erreur : {str(e)}")
+
+#3ème section : Accessibilité
+if("tailleTexte" not in streamlit.session_state):
+    streamlit.session_state.tailleTexte = 100
+with streamlit.expander("♿ Accessibilité", expanded=False):
+    streamlit.markdown("<hr style='border: 3px solid blue;'>", unsafe_allow_html=True)
+    col_acc1, _ = streamlit.columns([1,1])
+    with col_acc1:
+        streamlit.slider("Taille du texte (%)", min_value=50, max_value=150, step=10, help="Ajustez ici la taille de tous les textes de la page !", key="tailleTexte", on_change=placeholder_callback)
+#Bloc CSS Dynamique
+streamlit.markdown(f"""<style>h1, h2, h3 {{margin-top: 0rem !important; margin-bottom: 0rem !important; line-height: 1.2 !important;}}.stApp, .stApp * {{font-size: {streamlit.session_state.tailleTexte / 100}rem !important;}}h1{{font-size: 2.4em !important;}}h2{{font-size: 2.0em !important;}}h3{{font-size: 1.6em !important;}}</style>""", unsafe_allow_html=True)
