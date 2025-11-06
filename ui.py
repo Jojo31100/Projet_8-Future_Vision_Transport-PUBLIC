@@ -1,4 +1,4 @@
-#INTERFACE UTILISATEUR (DASHBOARD) v1.5_rc
+#INTERFACE UTILISATEUR (DASHBOARD) v2.0
 
 
 import streamlit
@@ -262,7 +262,7 @@ with streamlit.expander("🧪 Test des modèles", expanded=True):
             image = Image.open(fichier)
             streamlit.write("Choix du/des modèle(s) :")
             selectionModeleVGG = streamlit.checkbox("VGG16-Unet (ancien modèle)", value=True, key="upload_VGG")
-            selectionModeleYOLO = streamlit.checkbox("YOLOv8 (nouveau modèle)", value=False, key="upload_YOLO")
+            selectionModeleYOLO = streamlit.checkbox("YOLOv8 (nouveau modèle)", value=True, key="upload_YOLO")
             modeles = []
             if(selectionModeleVGG):
                 modeles.append("VGG16-Unet")
