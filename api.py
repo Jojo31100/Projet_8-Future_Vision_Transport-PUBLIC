@@ -1,4 +1,4 @@
-#API v1.1_alpha
+#API v2.0
 
 
 #Imports
@@ -50,7 +50,7 @@ def resizeHorizontalX2(image_array):
 #Endpoint racine
 @app.get("/")
 async def root():
-    return {"message": "API VGG16-Unet & YOLOv8 v1.1_alpha"}
+    return {"message": "API VGG16-Unet & YOLOv8 v2.0"}
 
 #Endpoint VGG16+Unet & YOLO : Lister les fichiers de test
 @app.post("/list")
@@ -134,11 +134,27 @@ async def predict_upload_YOLO(file: UploadFile = File(...)):
         fichierOctets = await file.read()
         if(len(fichierOctets) == 0):
             return {"error": "Fichier vide ou non lu correctement"}
+        #Chargement de l'image uploadée
         imageUploadee = Image.open(io.BytesIO(fichierOctets)).convert("RGB")
+        #Conversion en tableau NumPy (RGB)
         imageUploadee_array = numpy.array(imageUploadee)
-        height, width = imageUploadee_array.shape[:2]
-        #Inférence YOLO
-        predictions = modelCharge_YOLO.predict(numpy.array(imageUploadee), verbose=False)
+
+        # /!\ Notes importantes /!\
+        # Les images "Stellantis", récupérées auprès d'un ex-collègue étaient :
+        # - trop nettes (sharpness trop poussé)
+        # - en 1920x1080 au lieu de 2048x1024
+        # - encodées en RGBA --> provoquait un masque "full VOID"
+
+        #Conversion en format BGR (pour OpenCV)
+        imageUploadee_BGR = cv2.cvtColor(imageUploadee_array, cv2.COLOR_RGB2BGR)
+        #Redimensionnement en 2048x1024
+        imageUploadee_BGR = cv2.resize(imageUploadee_BGR, (2048, 1024), interpolation=cv2.INTER_AREA)
+        #Récupération des dimensions (2048x1024 normalement)
+        height, width = imageUploadee_BGR.shape[:2]
+        #Application d’un flou doux (GaussianBlur)
+        imageUploadee_BGR = cv2.GaussianBlur(imageUploadee_BGR, (5, 5), sigmaX=0)
+        #Prédiction YOLO
+        predictions = modelCharge_YOLO.predict(imageUploadee_BGR, verbose=False)
         masquePreditFusionne_8 = numpy.zeros((height, width), dtype=int)
         #YOLO travaille en segmentation par instance, et non pas segmentation par classe...
         if((predictions[0].masks is not None) and (len(predictions[0].masks.data) > 0)):
